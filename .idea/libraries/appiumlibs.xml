@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="appiumlibs">
+    <CLASSES>
+      <root url="file://C:/appiumlibs" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="file://C:/appiumlibs" recursive="false" />
+  </library>
+</component>

@@ -1,5 +1,6 @@
 package FrameWork;
 
+import AppiumSuite.ChromeTest;
 import AppiumSuite.EriBankTest;
 import AppiumSuite.PlayStore;
 import io.appium.java_client.AppiumDriver;
@@ -26,5 +27,6 @@ public class Suite implements Runnable{
     public void run() {
         new EriBankTest(this.driver, this.dc);
         new PlayStore(this.driver, this.dc);
+        new ChromeTest(this.driver, this.dc);
     }
 }

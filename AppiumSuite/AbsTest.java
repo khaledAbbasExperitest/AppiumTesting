@@ -28,9 +28,9 @@ public abstract class AbsTest {
         try {
 
             AndroidRunTest();
-            Write(this.testName + "------------------- Success");
+            Write(this.testName + "------------------- Success\n");
         }catch(Exception e){
-            Write(this.testName + "------------------- Failed");
+            Write(this.testName + "------------------- Failed\n");
             Write(e.toString());
             try {
                 Write(driver.getPageSource());

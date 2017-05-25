@@ -8,7 +8,7 @@ import java.util.List;
  * Created by khaled.abbas on 5/23/2017.
  */
 public class Runner {
-    static String reportFolderString = "c:\\temp\\Reports";
+    static final String reportFolderString = "c:\\temp\\Reports";
     static int repNum = 1;
     static List<String> devices;
     private static List<String> getDevicesList() {
@@ -71,6 +71,7 @@ public class Runner {
         System.out.println("Preparing the reports folder");
         try {
             File Report = new File("C:\\Users\\" + System.getProperty("user.name") + "\\Documents\\AppiumReports");
+            Report.mkdir();
             System.out.println(Report.getAbsolutePath());
             for (File file : Report.listFiles()) file.delete();
             File ReportFolder = new File(reportFolderString);

@@ -13,10 +13,15 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Created by khaled.abbas on 5/23/2017.
  */
 public class EriBankTest extends AbsTest{
+
+    // edit this line with your eribank app location.
+    private static final String ERIBANK_APP_LOCATION = "C:\\Experitest_programs\\SeeTest10.9.3383_debug\\bin\\ipas\\eribank.apk";
 
 
     public EriBankTest(AppiumDriver appiumDriver, DesiredCapabilities dc) {
@@ -29,7 +34,7 @@ public class EriBankTest extends AbsTest{
 
         dc.setCapability(AndroidMobileCapabilityType.APP_PACKAGE, "com.experitest.ExperiBank");
         dc.setCapability(AndroidMobileCapabilityType.APP_ACTIVITY, ".LoginActivity");
-        dc.setCapability(MobileCapabilityType.APP, "C:\\Program Files (x86)\\Experitest\\SeeTest_10_9\\bin\\ipas\\eribank.apk");
+        dc.setCapability(MobileCapabilityType.APP, ERIBANK_APP_LOCATION);
 
         dc.setCapability("noReset", false);
         try {
@@ -41,6 +46,7 @@ public class EriBankTest extends AbsTest{
     }
 
     protected void AndroidRunTest() throws Exception {
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         driver.findElementByXPath("//*[@text='Username']").sendKeys("company");
 
         WebElement passwordField = driver.findElement(By.xpath("//*[@resource-id='com.experitest.ExperiBank:id/passwordTextField']"));
