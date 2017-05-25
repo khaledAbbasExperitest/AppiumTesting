@@ -54,7 +54,7 @@ public class ChromeTest extends AbsTest {
         List buttonList = driver.findElementsByClassName("android.widget.ImageButton");
         for(Iterator<WebElement> iter = buttonList.iterator();iter.hasNext();){
             WebElement element = iter.next();
-            System.out.println(element.toString());
+            System.out.println(element.getTagName());
         }
         driver.context(currcontext);
         WebElement firstResoult = driver.findElement(By.partialLinkText("Appium"));

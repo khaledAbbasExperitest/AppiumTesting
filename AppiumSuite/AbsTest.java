@@ -34,7 +34,7 @@ public abstract class AbsTest {
             Write(e.toString());
             try {
                 Write(driver.getPageSource());
-                Write("/n");
+                Write("\n");
             }catch(Exception ex){
 
             }

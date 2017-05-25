@@ -21,11 +21,12 @@ import java.util.concurrent.TimeUnit;
 public class EriBankTest extends AbsTest{
 
     // edit this line with your eribank app location.
-    private static final String ERIBANK_APP_LOCATION = "C:\\Experitest_programs\\SeeTest10.9.3383_debug\\bin\\ipas\\eribank.apk";
+    private String eribankAppLocation;
 
 
     public EriBankTest(AppiumDriver appiumDriver, DesiredCapabilities dc) {
         super(appiumDriver, "EriBank");
+        eribankAppLocation = System.getProperty("user.dir") + "\\apps\\eribank.apk";
         createDriver(dc);
         executeTest();
     }
@@ -34,7 +35,7 @@ public class EriBankTest extends AbsTest{
 
         dc.setCapability(AndroidMobileCapabilityType.APP_PACKAGE, "com.experitest.ExperiBank");
         dc.setCapability(AndroidMobileCapabilityType.APP_ACTIVITY, ".LoginActivity");
-        dc.setCapability(MobileCapabilityType.APP, ERIBANK_APP_LOCATION);
+        dc.setCapability(MobileCapabilityType.APP, eribankAppLocation);
 
         dc.setCapability("noReset", false);
         try {

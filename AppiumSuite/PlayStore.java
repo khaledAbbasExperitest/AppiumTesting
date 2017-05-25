@@ -42,6 +42,14 @@ public class PlayStore extends AbsTest{
 
     protected void AndroidRunTest() throws Exception {
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+
+        try{
+            driver.findElement(By.xpath("//*[@text='Retry']")).click();
+            driver.findElement(By.xpath("//*[@text='Retry']")).click();
+        } catch(Exception e){
+            System.out.println("No Retry at start");
+        }
+
         try{
             new WebDriverWait(driver, 5).until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@text='ACCEPT' or @text='Accept']")));
             driver.findElement(By.xpath("//*[@text='ACCEPT' or @text='Accept']")).click();
