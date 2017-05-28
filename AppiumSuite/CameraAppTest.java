@@ -33,6 +33,7 @@ public class CameraAppTest extends AbsTest{
 
     public void createDriver(DesiredCapabilities dc) {
 
+        dc.setCapability(AndroidMobileCapabilityType.BROWSER_NAME, "");
         dc.setCapability(AndroidMobileCapabilityType.APP_PACKAGE, "com.CameraFlash");
         dc.setCapability(AndroidMobileCapabilityType.APP_ACTIVITY, ".MainActivity");
         dc.setCapability(MobileCapabilityType.APP, AppLocation);
@@ -46,7 +47,15 @@ public class CameraAppTest extends AbsTest{
     }
 
     protected void AndroidRunTest() throws Exception {
-        //TODO: come up with an intresting test for the camera app.
+        for(int i = 0; i < 10; i++) {
+            driver.findElement(By.xpath("//*[@class='android.widget.ImageView'][3]")).click();
+
+            System.out.println(driver.getDeviceTime() + "Zoomed in at: " + driver.getDeviceTime());
+        }
+        for(int i = 0; i < 5; i++) {
+            driver.findElementByXPath("//*[@class='android.widget.ImageView'][2]").click();
+            System.out.println(driver.getDeviceTime() + "Zoomed out at: " + driver.getDeviceTime());
+        }
     }
 
 }
