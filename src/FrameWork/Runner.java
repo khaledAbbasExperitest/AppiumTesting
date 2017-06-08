@@ -12,13 +12,13 @@ public class Runner {
     static String reportFolderString = "c:\\temp\\AppiumReports";
     static int repNum = 1;
     static boolean APPIUM_STUDIO = true;
-    public static boolean GRID = false;
+    public static boolean GRID = true;
     private static String cloudServerHost = "192.168.2.13";
     private static String cloudServerPort = "80";
     public static String cloudUser = "admin";
     public static String cloudPassword = "Experitest2012";
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         reportFolderString = "c:\\temp\\Reports";
         PrepareReportsFolders();
 
@@ -37,13 +37,16 @@ public class Runner {
         }
     }
 
-    private static Map<String, String> getDevicesList() {
+    private static Map<String, String> getDevicesList() throws IOException {
         Map<String, String> map = new HashMap<>();
-      //  map.put("FA69J0308869", new String[]{"android", getURL(map.size())});
-      //  map.put("P6Q7N15725000283", new String[]{"android", getURL(map.size())});
-       // map.put("d0595c1001b9d9d4", new String[]{"android", getURL(map.size())});
-        map.put("60ab9979d3fbef1c2692ac9b2b0aa766cb3efb44", "ios");
-
+        if (GRID) {
+            map = cloudAPI.getAllAvailableDevices();
+        } else {
+            map.put("FA69J0308869", "android");
+            map.put("P6Q7N15725000283", "android");
+            map.put("d0595c1001b9d9d4", "android");
+            map.put("60ab9979d3fbef1c2692ac9b2b0aa766cb3efb44", "ios");
+        }
         return map;
     }
 
@@ -81,7 +84,7 @@ public class Runner {
     public static void runThreads(Thread[] myThreadPool, Map<String, String> devicesMap) throws InterruptedException {
         Iterator iterator = devicesMap.entrySet().iterator();
         for (int i = 0; iterator.hasNext(); i++) {
-            FrameWork.Suite s = new Suite((Map.Entry<String, String>) iterator.next());
+            FrameWork.Suite s = new Suite((Map.Entry<String, String>) iterator.next(),getURL(0));
             Thread t = new Thread(s);
             myThreadPool[i] = t;
             myThreadPool[i].start();

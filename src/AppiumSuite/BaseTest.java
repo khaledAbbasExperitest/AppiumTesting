@@ -4,23 +4,16 @@ import FrameWork.NewAndroidDriver;
 import FrameWork.NewIOSDriver;
 import FrameWork.utils;
 import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.ios.IOSDriver;
 import org.apache.commons.io.FileUtils;
-import org.junit.runner.*;
-import org.openqa.selenium.Capabilities;
+import org.junit.runners.Suite;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.remote.SessionId;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Map;
-import java.util.logging.Level;
 
 public abstract class BaseTest {
     String deviceID;
@@ -30,10 +23,11 @@ public abstract class BaseTest {
     String url;
     private int index = 0;
 
-    BaseTest(String testName, Map.Entry<String, String> deviceEntry) {
+    BaseTest(String testName, Map.Entry<String, String> deviceEntry, String url) {
         this.deviceOS = deviceEntry.getValue();
         this.testName = testName;
         this.deviceID = deviceEntry.getKey();
+        this.url = url;
     }
 
 
@@ -72,14 +66,13 @@ public abstract class BaseTest {
 
     protected void setDriver(DesiredCapabilities dc) throws MalformedURLException {
         if (deviceOS.contains("ios")) {
-            driver = new NewIOSDriver(new URL(url), dc,deviceID);
+            driver = new NewIOSDriver(new URL(url), dc);
             System.out.println("A Good iOS Driver Was Created For - " + deviceID);
         } else {
-            driver = new NewAndroidDriver(new URL(url), dc,deviceID);
+            driver = new NewAndroidDriver(new URL(url), dc);
             System.out.println("A Good Android Driver Was Created For - " + deviceID);
         }
     }
-
 
 
     protected abstract void androidTest() throws Exception;
@@ -89,7 +82,7 @@ public abstract class BaseTest {
     public void screenshot(String path) throws IOException {
         File srcFile = driver.getScreenshotAs(OutputType.FILE);
         String filename = deviceID + "#" + System.currentTimeMillis();
-        File targetFile = new File(path +"\\"+ filename + ".jpg");
+        File targetFile = new File(path + "\\" + filename + ".jpg");
         FileUtils.copyFile(srcFile, targetFile);
     }
 

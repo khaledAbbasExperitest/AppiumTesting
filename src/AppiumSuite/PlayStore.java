@@ -1,6 +1,5 @@
 package AppiumSuite;
 
-import AppiumSuite.BaseTest;
 import io.appium.java_client.android.AndroidElement;
 import io.appium.java_client.remote.AndroidMobileCapabilityType;
 import org.openqa.selenium.By;
@@ -20,8 +19,8 @@ import java.util.concurrent.TimeUnit;
 public class PlayStore extends BaseTest {
 
 
-    public PlayStore(Map.Entry<String, String> deviceEntry, DesiredCapabilities generalDC) {
-        super("PlayStore", deviceEntry);
+    public PlayStore(Map.Entry<String, String> deviceEntry, DesiredCapabilities generalDC,String url) {
+        super("PlayStore", deviceEntry, url);
         DesiredCapabilities dc = createCapabilities(generalDC);
         try {
             setDriver(dc);

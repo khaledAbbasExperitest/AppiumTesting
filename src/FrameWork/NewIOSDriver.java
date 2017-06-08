@@ -11,9 +11,10 @@ import java.util.Date;
 public class NewIOSDriver extends IOSDriver {
     private final String deviceID;
     SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-    public NewIOSDriver(URL remoteAddress, Capabilities desiredCapabilities, String deviceID) {
+
+    public NewIOSDriver(URL remoteAddress, Capabilities desiredCapabilities) {
         super(remoteAddress, desiredCapabilities);
-        this.deviceID= deviceID;
+        this.deviceID = (String) desiredCapabilities.getCapability("udid");
     }
 
     @Override

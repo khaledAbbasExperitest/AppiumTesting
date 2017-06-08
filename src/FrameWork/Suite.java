@@ -12,8 +12,9 @@ public class Suite implements Runnable {
     private final Map.Entry<String, String> deviceEntry;
     DesiredCapabilities dc = new DesiredCapabilities();
     String deviceID;
-
-    public Suite(Map.Entry<String, String> deviceEntry) {
+    public String url;
+    public Suite(Map.Entry<String, String> deviceEntry, String url) {
+        this.url = url;
         this.deviceID = deviceEntry.getKey();
         this.deviceEntry = deviceEntry;
         dc.setCapability("udid", deviceID);
@@ -31,9 +32,9 @@ public class Suite implements Runnable {
     public void run() {
         System.out.println("Starting Suite For - " + deviceID);
         for (int i = 0; i < Runner.repNum; i++) {
-           new EriBankTest(deviceEntry, new DesiredCapabilities(this.dc));
+           new EriBankTest(deviceEntry, new DesiredCapabilities(this.dc),url);
 //            new PlayStore(deviceEntry, new DesiredCapabilities(this.dc));
-            new ChromeTest(deviceEntry, new DesiredCapabilities(this.dc));
+            new ChromeTest(deviceEntry, new DesiredCapabilities(this.dc),url);
 //            new CameraAppTest(deviceEntry, this.dc);
         }
     }

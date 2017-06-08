@@ -2,7 +2,6 @@ package AppiumSuite;
 
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.AndroidKeyCode;
-import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.remote.AndroidMobileCapabilityType;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -19,8 +18,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class ChromeTest extends AppiumSuite.BaseTest {
 
-    public ChromeTest(Map.Entry<String, String> deviceEntry, DesiredCapabilities generalDC){
-        super("ChromeTest",deviceEntry);
+    public ChromeTest(Map.Entry<String, String> deviceEntry, DesiredCapabilities generalDC, String url) {
+        super("ChromeTest", deviceEntry, url);
         DesiredCapabilities dc = createCapabilities(generalDC);
         try {
             setDriver(dc);
@@ -32,7 +31,7 @@ public class ChromeTest extends AppiumSuite.BaseTest {
 
     public DesiredCapabilities createCapabilities(DesiredCapabilities dc) {
         DesiredCapabilities tempDC = dc;
-        if(deviceOS.contains("android")) tempDC.setCapability(AndroidMobileCapabilityType.BROWSER_NAME, "Chrome");
+        if (deviceOS.contains("android")) tempDC.setCapability(AndroidMobileCapabilityType.BROWSER_NAME, "Chrome");
         else tempDC.setCapability(AndroidMobileCapabilityType.BROWSER_NAME, "Safari");
         return tempDC;
     }
@@ -42,7 +41,7 @@ public class ChromeTest extends AppiumSuite.BaseTest {
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         driver.get("http://google.com");
         System.out.println("page title: " + driver.getTitle());
-        driver.findElement(By.xpath("//*[@id=\"lst-ib\"]")).sendKeys("appium tutorial");
+        driver.findElement(By.xpath("//*[@id='lst-ib']")).sendKeys("appium tutorial");
         driver.findElementByXPath("//*[@name='btnG']").click();
 
         Map<String, String> sites = getSites();
@@ -50,11 +49,11 @@ public class ChromeTest extends AppiumSuite.BaseTest {
         String homeIdentifier = "//*[@class='android.widget.TextView']";
 
         for (Map.Entry site : sites.entrySet()) {
-            driver.get("http://"+site.getKey());
+            driver.get("http://" + site.getKey());
             driver.findElement(By.xpath((String) site.getValue()));
             ((AndroidDriver) driver).pressKeyCode(AndroidKeyCode.HOME);
             driver.context("native_app");
-           // System.out.println(driver.getPageSource());
+            // System.out.println(driver.getPageSource());
             driver.findElement(By.xpath(homeIdentifier));
         }
 
@@ -63,17 +62,16 @@ public class ChromeTest extends AppiumSuite.BaseTest {
 
     @Override
     protected void iosTest() throws Exception {
-      //  driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        //  driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         driver.get("http://google.com");
         System.out.println("page title: " + driver.getTitle());
-        driver.findElement(By.xpath("//*[@id=\"lst-ib\"]")).sendKeys("appium tutorial");
+        driver.findElement(By.xpath("//*[@id='lst-ib']")).sendKeys("appium tutorial");
         driver.findElementByXPath("//*[@name='btnG']").click();
 
         Map<String, String> sites = getSites();
-        String prefix = "chrome:";
         String homeIdentifier = "//*[@class='android.widget.TextView']";
         driver.get("https://en.wikipedia.org/wiki/Main_Page");
-        System.out.println(driver.getPageSource());
+       // System.out.println(driver.getPageSource());
         new WebDriverWait(driver, 10).until(ExpectedConditions.presenceOfElementLocated(By.id("searchIcon")));
         driver.findElement(By.id("searchIcon")).click();
         Thread.sleep(10000);
@@ -85,20 +83,9 @@ public class ChromeTest extends AppiumSuite.BaseTest {
             e.printStackTrace();
         }
         new WebDriverWait(driver, 30).until(ExpectedConditions.presenceOfElementLocated(By.linkText("Israel")));
-
-
-//        driver.findElement(By.linkText("Israel")).click();
-//        for (Map.Entry site : sites.entrySet()) {
-//            driver.get("http://"+site.getKey());
-//            driver.findElement(By.xpath((String) site.getValue()));
-//            ((IOSDriver) driver).pressKeyCode(AndroidKeyCode.HOME);
-//            driver.context("native_app");
-//            // System.out.println(driver.getPageSource());
-//            driver.findElement(By.xpath(homeIdentifier));
-//        }
-
         driver.closeApp();
     }
+
     private Map<String, String> getSites() {
         Map<String, String> sitesMap = new HashMap<>();
         sitesMap.put("www.bbc.com", "//*[@alt='BBC']");

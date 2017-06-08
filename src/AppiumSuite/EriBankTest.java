@@ -19,8 +19,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class EriBankTest extends BaseTest {
 
-    public EriBankTest(Map.Entry<String, String> deviceEntry, DesiredCapabilities generalDC) {
-        super("EriBank", deviceEntry);
+    public EriBankTest(Map.Entry<String, String> deviceEntry, DesiredCapabilities generalDC, String url) {
+        super("EriBank", deviceEntry, url);
         DesiredCapabilities dc = createCapabilities(generalDC);
         try {
             setDriver(dc);
@@ -36,11 +36,17 @@ public class EriBankTest extends BaseTest {
 
 
     public DesiredCapabilities createCapabilities(DesiredCapabilities dc) {
-        String eribankAppLocation = "http://192.168.2.72:8181/AndroidApps/eribank.apk";
+        String eribankAppLocation = "";
         DesiredCapabilities tempDC = dc;
+        if (deviceOS.contains("ios")) {
+            eribankAppLocation = "http://192.168.2.72:8181/iOSApps/EriBankO.ipa";
+        } else {
+            eribankAppLocation = "http://192.168.2.72:8181/AndroidApps/eribank.apk";
+            tempDC.setCapability(AndroidMobileCapabilityType.APP_PACKAGE, "com.experitest.ExperiBank");
+            tempDC.setCapability(AndroidMobileCapabilityType.APP_ACTIVITY, ".LoginActivity");
+        }
+
         System.out.println(eribankAppLocation);
-        tempDC.setCapability(AndroidMobileCapabilityType.APP_PACKAGE, "com.experitest.ExperiBank");
-        tempDC.setCapability(AndroidMobileCapabilityType.APP_ACTIVITY, ".LoginActivity");
         tempDC.setCapability(MobileCapabilityType.APP, eribankAppLocation);
         tempDC.setCapability("noReset", false);
 
@@ -49,7 +55,7 @@ public class EriBankTest extends BaseTest {
 
     @Override
     protected void androidTest() throws Exception {
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+      //  driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         driver.findElementByXPath("//*[@text='Username']").sendKeys("company");
 
         WebElement passwordField = driver.findElement(By.xpath("//*[@resource-id='com.experitest.ExperiBank:id/passwordTextField']"));
