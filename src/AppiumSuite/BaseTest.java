@@ -2,10 +2,11 @@ package AppiumSuite;
 
 import FrameWork.NewAndroidDriver;
 import FrameWork.NewIOSDriver;
+import FrameWork.Runner;
 import FrameWork.utils;
 import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.android.AndroidDriver;
 import org.apache.commons.io.FileUtils;
-import org.junit.runners.Suite;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
@@ -13,7 +14,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Map;
+
+import static Utils.ExceptionExtractor.ExtractExceptions;
 
 public abstract class BaseTest {
     String deviceID;
@@ -44,20 +48,29 @@ public abstract class BaseTest {
             } else {
                 androidTest();
             }
+            System.out.println("--------------------------------------------------------------------------");
+            System.out.println("THE TEST HAD PASSED - " + testName + " For Device - " + deviceID);
+            System.out.println("--------------------------------------------------------------------------");
             utils.writeToOverall(true, deviceID, testName, null);
         } catch (Exception e) {
+            System.out.println("FAILED - " + deviceID);
             e.printStackTrace();
             try {
                 if (!FrameWork.Runner.GRID) screenshot("screen");
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
+
             utils.writeToOverall(false, deviceID, testName, e);
         }
         try {
             driver.quit();
         } catch (Exception e) {
+            System.out.println("Failed to quit()!!!! - " + deviceID);
             e.printStackTrace();
+        }
+        if (Runner.GRID && Runner.SCAN_LOG) {
+            getAndWriteExceptions("");
         }
         System.out.println("--------------------------------------------------------------------------");
         System.out.println("Ending test - " + testName + " For Device - " + deviceID);
@@ -68,9 +81,13 @@ public abstract class BaseTest {
         if (deviceOS.contains("ios")) {
             driver = new NewIOSDriver(new URL(url), dc);
             System.out.println("A Good iOS Driver Was Created For - " + deviceID);
+
         } else {
             driver = new NewAndroidDriver(new URL(url), dc);
             System.out.println("A Good Android Driver Was Created For - " + deviceID);
+            if (((AndroidDriver) driver).isLocked())
+                ((AndroidDriver) driver).unlockDevice();
+
         }
     }
 
@@ -86,4 +103,47 @@ public abstract class BaseTest {
         FileUtils.copyFile(srcFile, targetFile);
     }
 
+    public void getAndWriteExceptions(String generatedReportFolder) {
+        ArrayList<String> exceptionArray = null;
+        exceptionArray = tryToCheckTheLogForExceptions(generatedReportFolder);
+        boolean flag = false;
+        try {
+            if (exceptionArray.size() > 0) {
+                for (int j = 0; j < exceptionArray.size(); j++) {
+                    if (j > 5) break;
+                    if (!exceptionArray.get(j).contains("start ui automationCould")) {
+                        if (!exceptionArray.get(j).contains("illegal node name")) {
+                            if (!exceptionArray.get(j).contains("Failed to scroll the element into view")) {
+                                String exceptionFinalString;
+                                try {
+                                    exceptionFinalString = exceptionArray.get(j).substring(0, exceptionArray.get(j).indexOf(" at ", 500));
+                                } catch (Exception e) {
+                                    exceptionFinalString = exceptionArray.get(j);
+                                }
+                               // writeToSummaryReport("\t" + deviceName + " -\n" + "\t" + exceptionFinalString);
+                                flag = true;
+                            }
+                        }
+                    }
+                }
+                if (flag){}
+             //       writeToSummaryReport(Thread.currentThread().getName() + "  " + deviceName + " - " + "REPORT - " + generatedReportFolder + " - file:///" + generatedReportFolder.replace('\\', '/') + "/index.html\n");
+
+            }
+        } catch (Exception e) {
+
+        }
+    }
+
+    public ArrayList<String> tryToCheckTheLogForExceptions(String generatedReportFolder) {
+        ArrayList<String> exceptionArray = null;
+
+        try {
+            exceptionArray = ExtractExceptions(generatedReportFolder);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return exceptionArray;
+    }
 }

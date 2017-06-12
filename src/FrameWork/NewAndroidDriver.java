@@ -22,8 +22,12 @@ public class NewAndroidDriver extends AndroidDriver {
     @Override
     protected void log(SessionId sessionId, String commandName, Object toLog, When when) {
         if (commandName.equals("newSession")) sdf = new SimpleDateFormat("HH:mm:ss");
-        System.out.println(sdf.format(new Date(System.currentTimeMillis())) + ": " + deviceID + " - " + when + ": " + commandName + " toLog:" + toLog);
         super.log(sessionId, commandName, toLog, when);
-        utils.writeToDeviceLog(deviceID, sdf.format(new Date(System.currentTimeMillis())) + when + ": " + commandName + " toLog:" + toLog);
+
+        System.out.println(sdf.format(new Date(System.currentTimeMillis())) + ": " + deviceID + " - " + when + ": " + commandName + " toLog:" + toLog);
+        if (deviceID != null) {
+            utils.writeToDeviceLog(deviceID, sdf.format(new Date(System.currentTimeMillis())) + when + ": " + commandName + " toLog:" + toLog);
+
+        }
     }
 }

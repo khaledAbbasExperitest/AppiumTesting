@@ -5,30 +5,26 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-/**
- * Created by khaled.abbas on 5/23/2017.
- */
 public class Runner {
     static String reportFolderString = "c:\\temp\\AppiumReports";
-    static int repNum = 1;
+    static int REP_NUM = 2;
     static boolean APPIUM_STUDIO = true;
     public static boolean GRID = true;
-    private static String cloudServerHost = "192.168.2.13";
-    private static String cloudServerPort = "80";
-    public static String cloudUser = "admin";
-    public static String cloudPassword = "Experitest2012";
+    private static boolean ALL_DEVICES = false;
+    public static boolean SCAN_LOG = false;
+
+    static CloudServer cloudServer = new CloudServer(CloudServer.CloudServerName.MY);
 
     public static void main(String[] args) throws IOException {
-        reportFolderString = "c:\\temp\\Reports";
         PrepareReportsFolders();
 
         Map<String, String> devicesMap = getDevicesList();
-        Thread[] threadPool = new Thread[devicesMap.size()];
+        Thread[] threads = new Thread[devicesMap.size()];
         try {
-            runThreads(threadPool, devicesMap);
+            runThreads(threads, devicesMap);
 
-            for (int i = 0; i < threadPool.length; i++) {
-                while (threadPool[i].isAlive()) {
+            for (int i = 0; i < threads.length; i++) {
+                while (threads[i].isAlive()) {
                     Thread.sleep(1000);
                 }
             }
@@ -40,12 +36,14 @@ public class Runner {
     private static Map<String, String> getDevicesList() throws IOException {
         Map<String, String> map = new HashMap<>();
         if (GRID) {
-            map = cloudAPI.getAllAvailableDevices();
+            if(ALL_DEVICES){
+                map = cloudServer.getAllAvailableDevices();
+            }else{
+                map.put("d0595c1001b9d9d4", cloudServer.getDeviceOSByUDID("d0595c1001b9d9d4"));
+               // map.put("70e758825ec3ae077386a811f6e03aa53ca19d77", cloudServer.getDeviceOSByUDID("70e758825ec3ae077386a811f6e03aa53ca19d77"));
+            }
         } else {
-            map.put("FA69J0308869", "android");
-            map.put("P6Q7N15725000283", "android");
-            map.put("d0595c1001b9d9d4", "android");
-            map.put("60ab9979d3fbef1c2692ac9b2b0aa766cb3efb44", "ios");
+            map.put("d0595c1001b9d9d4","android");
         }
         return map;
     }
@@ -54,7 +52,7 @@ public class Runner {
 
         if (APPIUM_STUDIO) {
             if (GRID) {
-                return "http://" + cloudServerHost + ":" + cloudServerPort + "/wd/hub/";
+                return cloudServer.gridURL;
             } else {
                 return "http://localhost:4723/wd/hub/";
             }
@@ -67,24 +65,33 @@ public class Runner {
     private static void PrepareReportsFolders() {
         System.out.println("Preparing the reports folder");
         try {
-            File Report = new File(reportFolderString);
-            Report.mkdir();
-            System.out.println("Reports will be created at - " + Report.getAbsolutePath());
-            for (File file : Report.listFiles()) file.delete();
+            File reportFolder = new File(reportFolderString);
+            if (!reportFolder.exists()) reportFolder.mkdir();
+            for (File file : reportFolder.listFiles()) file.delete();
             System.out.println("Finished cleaning the reports folder");
-            File ReportFolder = new File("reports");
-            for (File file : ReportFolder.listFiles()) utils.DeleteRecursive(file);
-            for (File file : (new File("screen").listFiles())) file.delete();
+
+            File logsFolder = new File("reports");
+            if (!logsFolder.exists()) logsFolder.mkdir();
+            for (File file : logsFolder.listFiles()) utils.DeleteRecursive(file);
+            System.out.println("Finished cleaning the Logs folder");
+
+            File screenShots = new File("screenShots");
+            if (!screenShots.exists()) screenShots.mkdir();
+            for (File file : (screenShots.listFiles())) file.delete();
+            System.out.println("Finished cleaning the ScreenShots folder");
+
             System.out.println("Finished preparing the reports folder");
+            System.out.println("Reports will be created at - " + reportFolder.getAbsolutePath());
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static void runThreads(Thread[] myThreadPool, Map<String, String> devicesMap) throws InterruptedException {
+    public static void runThreads(Thread[] myThreadPool, Map<String, String> devicesMap) throws InterruptedException, IOException {
         Iterator iterator = devicesMap.entrySet().iterator();
         for (int i = 0; iterator.hasNext(); i++) {
-            FrameWork.Suite s = new Suite((Map.Entry<String, String>) iterator.next(),getURL(0));
+            FrameWork.Suite s = new Suite((Map.Entry<String, String>) iterator.next(), getURL(0));
             Thread t = new Thread(s);
             myThreadPool[i] = t;
             myThreadPool[i].start();

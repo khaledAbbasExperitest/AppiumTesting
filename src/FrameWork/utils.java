@@ -1,7 +1,10 @@
 package FrameWork;
 
 import com.sun.javafx.binding.StringFormatter;
+import io.appium.java_client.AppiumDriver;
+import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.OutputType;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -50,5 +53,11 @@ public class utils {
         } catch (IOException ex) {
             e.printStackTrace();
         }
+    }
+    public void screenshot(AppiumDriver driver, String path) throws IOException {
+        File srcFile = driver.getScreenshotAs(OutputType.FILE);
+        String filename = "dfjklsdhfjk" + "#" + System.currentTimeMillis();
+        File targetFile = new File(path + "\\" + filename + ".jpg");
+        FileUtils.copyFile(srcFile, targetFile);
     }
 }

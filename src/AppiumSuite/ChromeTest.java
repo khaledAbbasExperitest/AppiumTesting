@@ -62,7 +62,7 @@ public class ChromeTest extends AppiumSuite.BaseTest {
 
     @Override
     protected void iosTest() throws Exception {
-        //  driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         driver.get("http://google.com");
         System.out.println("page title: " + driver.getTitle());
         driver.findElement(By.xpath("//*[@id='lst-ib']")).sendKeys("appium tutorial");
