@@ -11,16 +11,15 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.net.MalformedURLException;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class EriBankTest extends BaseTest {
 
-    public EriBankTest(Map.Entry<String, String> deviceEntry, DesiredCapabilities generalDC, String url) {
-        super("EriBank", deviceEntry, url);
+    public EriBankTest(String deviceID, DesiredCapabilities generalDC, String url) {
+        super("EriBank", deviceID, url);
         DesiredCapabilities dc = createCapabilities(generalDC);
         try {
-            setDriver(dc);
+            CreateDriver(dc);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -43,7 +42,6 @@ public class EriBankTest extends BaseTest {
             dc.setCapability(AndroidMobileCapabilityType.APP_ACTIVITY, ".LoginActivity");
         }
         DesiredCapabilities tempDC = dc;
-        tempDC.setCapability("testName",testName);
         tempDC.setCapability(MobileCapabilityType.NO_RESET, false);
 
         return tempDC;
@@ -74,7 +72,18 @@ public class EriBankTest extends BaseTest {
         WebElement selectCountry = driver.findElement(By.xpath("//*[@resource-id='com.experitest.ExperiBank:id/countryButton']"));
         selectCountry.click();
         driver.findElement(By.xpath("//*[@text='New Zealand']")).click();
-        driver.findElement(By.xpath("//*[@text='Send Payment']")).click();
+
+
+        boolean flag = false;
+        while (!flag) {
+            try {
+                driver.findElement(By.xpath("xpath=//*[@text='Send Payment' and @onScreen='true']"));
+                flag=true;
+            } catch (Exception e) {
+                driver.swipe(500, 1000, 500, 200, 1000);
+            }
+        }
+        driver.findElement(By.xpath("//*[@text='Send Payment' and @onScreen='true']")).click();
         new WebDriverWait(driver, 10).until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@text='Yes']")));
         driver.findElement(By.xpath("/*//*[@text='Yes']")).click();
         driver.rotate(ScreenOrientation.PORTRAIT);

@@ -9,6 +9,7 @@ import io.appium.java_client.remote.AndroidMobileCapabilityType;
 import io.appium.java_client.remote.IOSMobileCapabilityType;
 import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.remote.MobileCapabilityType;
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.ScreenOrientation;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -41,7 +42,7 @@ public class SingleTest {
         DesiredCapabilities dc = new DesiredCapabilities();
         cloudServer = new CloudServer(CloudServer.CloudServerName.MY);
 
-        dc.setCapability("stream", "6");
+        dc.setCapability("stream", "6.1.1");
         dc.setCapability("user", cloudServer.USER);
         dc.setCapability("password", cloudServer.PASS);
         dc.setCapability(MobileCapabilityType.NO_RESET, true);
@@ -54,7 +55,7 @@ public class SingleTest {
         dc.setCapability("os", os);
 
         if (os.contains("ios")) {
-            dc.setCapability(MobileCapabilityType.APP, "cloud:com.experitest.ExperiBankO1");
+            dc.setCapability(MobileCapabilityType.APP, "cloud:com.experitest.ExperiBankO");
             dc.setCapability(IOSMobileCapabilityType.BUNDLE_ID, "cloud:com.experitest.ExperiBankO");
             dc.setCapability("instrumentApp", true);
 //            dc.setCapability(MobileCapabilityType.APP, "com.apple.MobileSMS");
@@ -63,7 +64,7 @@ public class SingleTest {
         } else {
 //            dc.setCapability(MobileCapabilityType.APP, "cloud:com.experitest.ExperiBank/.LoginActivity");
 //            dc.setCapability(AndroidMobileCapabilityType.APP_PACKAGE, "com.experitest.ExperiBank");
-
+//
             dc.setCapability(MobileCapabilityType.APP, "http://192.168.2.72:8181/AndroidApps/eribank.apk");
             dc.setCapability(AndroidMobileCapabilityType.APP_PACKAGE, "com.experitest.ExperiBank");
             dc.setCapability(AndroidMobileCapabilityType.APP_ACTIVITY, ".LoginActivity");
@@ -81,6 +82,8 @@ public class SingleTest {
             return driver;
         } else {
             AndroidDriver driver = getAndroidDriver(dc, cloudURL);
+            driver.rotate(ScreenOrientation.LANDSCAPE);
+
             return driver;
 
         }
@@ -118,7 +121,22 @@ public class SingleTest {
     }
 
     private void AndroidTest() {
+        if(GRID) System.out.println(driver.getCapabilities().getCapability("cloudViewLink"));
 
+        if (((AndroidDriver) driver).isLocked()){
+            System.out.println("Locked - Opening");
+            ((AndroidDriver) driver).unlockDevice();
+        }else{
+            System.out.println("false on isLocked");
+        }
+        if (((AndroidDriver) driver).isLocked()){
+            System.out.println("Open - Locking");
+            ((AndroidDriver) driver).lockDevice();
+        }else{
+            System.out.println("false on isLocked");
+        }
+
+        if(((AndroidDriver) driver).isLocked())
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         driver.findElementByXPath("//*[@text='Username']").sendKeys("company");
 
@@ -150,6 +168,7 @@ public class SingleTest {
 
     private void IOSTest() {
         //driver.swipe(500,0,500,1000,1000);
+        Capabilities ddd = driver.getCapabilities();
 
         driver.findElement(By.xpath("//*[@placeholder='Username']")).sendKeys("company");
         System.out.println(driver.findElement(By.xpath("//*[@placeholder='Username']")).getText());

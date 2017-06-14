@@ -15,25 +15,28 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Map;
 
 import static Utils.ExceptionExtractor.ExtractExceptions;
 
 public abstract class BaseTest {
+    private String deviceName;
     String deviceID;
     String deviceOS;
     AppiumDriver driver;
     String testName;
     String url;
-    private int index = 0;
 
-    BaseTest(String testName, Map.Entry<String, String> deviceEntry, String url) {
-        this.deviceOS = deviceEntry.getValue();
+    BaseTest(String testName, String deviceID, String url) {
         this.testName = testName;
-        this.deviceID = deviceEntry.getKey();
+        this.deviceID = deviceID;
         this.url = url;
+        try {
+            this.deviceOS = Runner.cloudServer.getDeviceOSByUDID(deviceID);
+            this.deviceName = Runner.cloudServer.getDeviceNameByUDID(this.deviceID);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
-
 
     public abstract DesiredCapabilities createCapabilities(DesiredCapabilities dc);
 
@@ -51,9 +54,11 @@ public abstract class BaseTest {
             System.out.println("--------------------------------------------------------------------------");
             System.out.println("THE TEST HAD PASSED - " + testName + " For Device - " + deviceID);
             System.out.println("--------------------------------------------------------------------------");
-            utils.writeToOverall(true, deviceID, testName, null);
+            utils.writeToOverall(true, deviceName.replace(" ","_").trim(), testName, null);
         } catch (Exception e) {
-            System.out.println("FAILED - " + deviceID);
+            System.out.println("--------------------------------------------------------------------------");
+            System.out.println("THE TEST HAD FAILED *** - " + testName + " For Device - " + deviceName + "_" + deviceID);
+            System.out.println("--------------------------------------------------------------------------");
             e.printStackTrace();
             try {
                 if (!FrameWork.Runner.GRID) screenshot("screen");
@@ -77,7 +82,9 @@ public abstract class BaseTest {
         System.out.println("--------------------------------------------------------------------------");
     }
 
-    protected void setDriver(DesiredCapabilities dc) throws MalformedURLException {
+    protected void CreateDriver(DesiredCapabilities dc) throws MalformedURLException {
+        dc.setCapability("testName", testName + "_" + deviceName);
+
         if (deviceOS.contains("ios")) {
             driver = new NewIOSDriver(new URL(url), dc);
             System.out.println("A Good iOS Driver Was Created For - " + deviceID);
@@ -120,14 +127,15 @@ public abstract class BaseTest {
                                 } catch (Exception e) {
                                     exceptionFinalString = exceptionArray.get(j);
                                 }
-                               // writeToSummaryReport("\t" + deviceName + " -\n" + "\t" + exceptionFinalString);
+                                // writeToSummaryReport("\t" + deviceName + " -\n" + "\t" + exceptionFinalString);
                                 flag = true;
                             }
                         }
                     }
                 }
-                if (flag){}
-             //       writeToSummaryReport(Thread.currentThread().getName() + "  " + deviceName + " - " + "REPORT - " + generatedReportFolder + " - file:///" + generatedReportFolder.replace('\\', '/') + "/index.html\n");
+                if (flag) {
+                }
+                //       writeToSummaryReport(Thread.currentThread().getName() + "  " + deviceName + " - " + "REPORT - " + generatedReportFolder + " - file:///" + generatedReportFolder.replace('\\', '/') + "/index.html\n");
 
             }
         } catch (Exception e) {

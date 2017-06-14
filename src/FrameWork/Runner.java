@@ -1,27 +1,26 @@
 package FrameWork;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 public class Runner {
     static String reportFolderString = "c:\\temp\\AppiumReports";
-    static int REP_NUM = 2;
+    static int REP_NUM = 1;
     static boolean APPIUM_STUDIO = true;
     public static boolean GRID = true;
-    private static boolean ALL_DEVICES = false;
+    private static boolean ALL_DEVICES = true;
     public static boolean SCAN_LOG = false;
 
-    static CloudServer cloudServer = new CloudServer(CloudServer.CloudServerName.MY);
+    public static CloudServer cloudServer = new CloudServer(CloudServer.CloudServerName.MY);
+    public static String STREAM_NAME = "1.Chrome.2";
 
     public static void main(String[] args) throws IOException {
         PrepareReportsFolders();
 
-        Map<String, String> devicesMap = getDevicesList();
-        Thread[] threads = new Thread[devicesMap.size()];
+        List<String> devicesList = getDevicesList();
+        Thread[] threads = new Thread[devicesList.size()];
         try {
-            runThreads(threads, devicesMap);
+            runThreads(threads, devicesList);
 
             for (int i = 0; i < threads.length; i++) {
                 while (threads[i].isAlive()) {
@@ -33,19 +32,29 @@ public class Runner {
         }
     }
 
-    private static Map<String, String> getDevicesList() throws IOException {
-        Map<String, String> map = new HashMap<>();
+    private static List<String> getDevicesList() throws IOException {
+        List<String> devicesList = new ArrayList<>();
         if (GRID) {
-            if(ALL_DEVICES){
-                map = cloudServer.getAllAvailableDevices();
-            }else{
-                map.put("d0595c1001b9d9d4", cloudServer.getDeviceOSByUDID("d0595c1001b9d9d4"));
-               // map.put("70e758825ec3ae077386a811f6e03aa53ca19d77", cloudServer.getDeviceOSByUDID("70e758825ec3ae077386a811f6e03aa53ca19d77"));
+            if (ALL_DEVICES) {
+                devicesList = cloudServer.getAllAvailableDevices();
+            } else {
+                devicesList.add("d0595c1001b9d9d4");
             }
         } else {
-            map.put("d0595c1001b9d9d4","android");
+            devicesList.add("636cb7a36d429661e6be6d70e1447a66268f73ff");
+            devicesList.add("00e2e5fb3fdc464b");
+
         }
-        return map;
+        return devicesList;
+    }
+
+    private static void addToMap(Map<String, String> map, String udid) throws IOException {
+        String os = cloudServer.getDeviceOSByUDID(udid);
+        if (os != null) {
+            map.put(udid, os);
+        }else{
+            System.out.println("CAN'T Find OS FOR - "+udid);
+        }
     }
 
     private static String getURL(int size) {
@@ -88,10 +97,9 @@ public class Runner {
         }
     }
 
-    public static void runThreads(Thread[] myThreadPool, Map<String, String> devicesMap) throws InterruptedException, IOException {
-        Iterator iterator = devicesMap.entrySet().iterator();
-        for (int i = 0; iterator.hasNext(); i++) {
-            FrameWork.Suite s = new Suite((Map.Entry<String, String>) iterator.next(), getURL(0));
+    public static void runThreads(Thread[] myThreadPool, List<String> devicesList) throws InterruptedException, IOException {
+        for (int i = 0; i<devicesList.size(); i++) {
+            FrameWork.Suite s = new Suite(devicesList.get(i), getURL(0));
             Thread t = new Thread(s);
             myThreadPool[i] = t;
             myThreadPool[i].start();

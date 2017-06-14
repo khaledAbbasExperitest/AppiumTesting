@@ -19,11 +19,12 @@ import java.util.concurrent.TimeUnit;
 public class PlayStore extends BaseTest {
 
 
-    public PlayStore(Map.Entry<String, String> deviceEntry, DesiredCapabilities generalDC,String url) {
-        super("PlayStore", deviceEntry, url);
+    public PlayStore(String deviceID, DesiredCapabilities generalDC,String url) {
+
+        super("PlayStore", deviceID, url);
         DesiredCapabilities dc = createCapabilities(generalDC);
         try {
-            setDriver(dc);
+            CreateDriver(dc);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }

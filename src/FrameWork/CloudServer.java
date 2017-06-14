@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -106,10 +107,10 @@ public class CloudServer {
         return deviceOS;
     }
 
-    public Map<String, String> getAllAvailableDevices() throws IOException {
+    public List<String> getAllAvailableDevices() throws IOException {
         String result = doGet(DEVICES_URL);
-        Map<String, String> deviceMap = getAvailableDevicesMap(result);
-        return deviceMap;
+        List<String> devicesList = getAvailableDevicesMap(result);
+        return devicesList;
     }
 
     private String getDeviceOS(String result, String udid) {
@@ -158,8 +159,8 @@ public class CloudServer {
         }
     }
 
-    private Map<String, String> getAvailableDevicesMap(String result) {
-        Map<String, String> tempDeviceMap = new HashMap<>();
+    private List<String> getAvailableDevicesMap(String result) {
+        List<String> tempDevicesList = new ArrayList<>();
         JSONObject jsonObject = new JSONObject(result);
         Map obj = jsonObject.toMap();
         List<Object> data = (List<Object>) obj.get("data");
@@ -173,24 +174,18 @@ public class CloudServer {
             int j = 0;
 
             boolean udidFlag = false;
-            boolean osFlag = false;
             String udid = null;
-            String deviceOs = null;
 
-            while (j < devicePropertiesArray.length && (!udidFlag || !osFlag)) {
+            while (j < devicePropertiesArray.length && !udidFlag) {
                 if (devicePropertiesArray[j].contains("udid")) {
                     udid = devicePropertiesArray[j].replace("udid=", "").trim();
                     udidFlag = true;
                 }
-                if (devicePropertiesArray[j].contains("deviceOs")) {
-                    deviceOs = devicePropertiesArray[j].replace("deviceOs=", "").trim().toLowerCase();
-                    osFlag = true;
-                }
                 j++;
             }
-            tempDeviceMap.put(udid, deviceOs);
+            tempDevicesList.add(udid);
         }
-        System.out.println(tempDeviceMap.toString());
-        return tempDeviceMap;
+        System.out.println(tempDevicesList.toString());
+        return tempDevicesList;
     }
 }

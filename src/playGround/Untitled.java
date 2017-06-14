@@ -1,6 +1,6 @@
 package playGround;//package <set your test package>;
-import io.appium.java_client.remote.IOSMobileCapabilityType;
-import io.appium.java_client.ios.IOSDriver;
+import io.appium.java_client.remote.AndroidMobileCapabilityType;
+import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.remote.MobileCapabilityType;
 import org.openqa.selenium.ScreenOrientation;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -10,10 +10,10 @@ import java.net.URL;
 import java.net.MalformedURLException;
 
 public class Untitled {
-    private String reportDirectory = "reports";
+    private String reportDirectory = "C:\\Temp\\SingleTest";
     private String reportFormat = "xml";
     private String testName = "Untitled";
-    protected IOSDriver driver = null;
+    protected AndroidDriver driver = null;
 
     @Before
     public void setUp() throws MalformedURLException {
@@ -21,16 +21,12 @@ public class Untitled {
         dc.setCapability("reportDirectory", reportDirectory);
         dc.setCapability("reportFormat", reportFormat);
         dc.setCapability("testName", testName);
-        dc.setCapability(MobileCapabilityType.UDID, "d91b89324f2de44c5e86e5cac6a1b07dd685a49b");
-        dc.setCapability(MobileCapabilityType.APP, "cloud:com.experitest.ExperiBankO");
-        dc.setCapability(IOSMobileCapabilityType.BUNDLE_ID, "cloud:com.experitest.ExperiBankO");
-        dc.setCapability("instrumentApp", true);
-        driver = new IOSDriver(new URL("http://localhost:4723/wd/hub"), dc);
+        dc.setCapability(MobileCapabilityType.UDID, "00e2e5fb3fdc464b");
+        driver = new AndroidDriver(new URL("http://localhost:4723/wd/hub"), dc);
     }
 
     @Test
     public void testUntitled() {
-        driver.findElement(By.xpath("//*[@text='Login']")).click();
     }
 
     @After

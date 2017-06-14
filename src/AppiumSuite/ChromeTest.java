@@ -4,6 +4,7 @@ import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.AndroidKeyCode;
 import io.appium.java_client.remote.AndroidMobileCapabilityType;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -18,12 +19,15 @@ import java.util.concurrent.TimeUnit;
  */
 public class ChromeTest extends AppiumSuite.BaseTest {
 
-    public ChromeTest(Map.Entry<String, String> deviceEntry, DesiredCapabilities generalDC, String url) {
+    public ChromeTest(String deviceEntry, DesiredCapabilities generalDC, String url) {
         super("ChromeTest", deviceEntry, url);
         DesiredCapabilities dc = createCapabilities(generalDC);
         try {
-            setDriver(dc);
+            CreateDriver(dc);
         } catch (MalformedURLException e) {
+            System.out.println("--------------------------------------------------------------------------");
+            System.out.println(e.getMessage()+" - " + deviceEntry);
+            System.out.println("--------------------------------------------------------------------------");
             e.printStackTrace();
         }
         executeTest();
@@ -69,20 +73,12 @@ public class ChromeTest extends AppiumSuite.BaseTest {
         driver.findElementByXPath("//*[@name='btnG']").click();
 
         Map<String, String> sites = getSites();
-        String homeIdentifier = "//*[@class='android.widget.TextView']";
-        driver.get("https://en.wikipedia.org/wiki/Main_Page");
-       // System.out.println(driver.getPageSource());
-        new WebDriverWait(driver, 10).until(ExpectedConditions.presenceOfElementLocated(By.id("searchIcon")));
-        driver.findElement(By.id("searchIcon")).click();
-        Thread.sleep(10000);
-        try {
-            WebElement findElement = driver.findElement(By.xpath("//*[@name='search']"));
-            findElement.sendKeys("Israel");
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        for (Map.Entry site : sites.entrySet()) {
+            driver.get("http://" + site.getKey());
+            driver.findElement(By.xpath((String) site.getValue()));
+//
         }
-        new WebDriverWait(driver, 30).until(ExpectedConditions.presenceOfElementLocated(By.linkText("Israel")));
+
         driver.closeApp();
     }
 
