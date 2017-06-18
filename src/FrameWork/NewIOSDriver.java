@@ -10,11 +10,17 @@ import java.util.Date;
 
 public class NewIOSDriver extends IOSDriver {
     private final String deviceID;
+    private final String deviceName;
+
     SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 
     public NewIOSDriver(URL remoteAddress, Capabilities desiredCapabilities) {
         super(remoteAddress, desiredCapabilities);
+        if (Runner.GRID) System.out.println(this.getCapabilities().getCapability("cloudViewLink"));
+
         this.deviceID = (String) desiredCapabilities.getCapability("udid");
+        this.deviceName = ((String) desiredCapabilities.getCapability("deviceName")).replace(" ","_").replace("'","-").trim();
+
     }
 
     @Override
@@ -22,6 +28,7 @@ public class NewIOSDriver extends IOSDriver {
         if (commandName.equals("newSession")) sdf = new SimpleDateFormat("HH:mm:ss");
         System.out.println(sdf.format(new Date(System.currentTimeMillis())) + ": " + deviceID + " - " + when + ": " + commandName + " toLog:" + toLog);
         super.log(sessionId, commandName, toLog, when);
-        FrameWork.utils.writeToDeviceLog(deviceID, sdf.format(new Date(System.currentTimeMillis())) + when + ": " + commandName + " toLog:" + toLog);
-    }
+        if (deviceName != null) {
+            utils.writeToDeviceLog(deviceName, sdf.format(new Date(System.currentTimeMillis())) + when + ": " + commandName + " toLog:" + toLog);
+        }    }
 }

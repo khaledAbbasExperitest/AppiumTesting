@@ -38,7 +38,7 @@ public class Runner {
             if (ALL_DEVICES) {
                 devicesList = cloudServer.getAllAvailableDevices();
             } else {
-                devicesList.add("d0595c1001b9d9d4");
+                devicesList.add("00d064b580b7e36184819a9ce668f8c9f1d2413f");
             }
         } else {
             devicesList.add("636cb7a36d429661e6be6d70e1447a66268f73ff");

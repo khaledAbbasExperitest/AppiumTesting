@@ -4,6 +4,7 @@ import io.appium.java_client.remote.AndroidMobileCapabilityType;
 import io.appium.java_client.remote.IOSMobileCapabilityType;
 import io.appium.java_client.remote.MobileCapabilityType;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.ScreenOrientation;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -49,6 +50,7 @@ public class EriBankTest extends BaseTest {
 
     @Override
     protected void androidTest() throws Exception {
+        Capabilities aaa = driver.getCapabilities();
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         driver.findElementByXPath("//*[@text='Username']").sendKeys("company");
 
@@ -85,7 +87,7 @@ public class EriBankTest extends BaseTest {
         }
         driver.findElement(By.xpath("//*[@text='Send Payment' and @onScreen='true']")).click();
         new WebDriverWait(driver, 10).until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@text='Yes']")));
-        driver.findElement(By.xpath("/*//*[@text='Yes']")).click();
+        driver.findElement(By.xpath("//*[@text='Yes']")).click();
         driver.rotate(ScreenOrientation.PORTRAIT);
         driver.findElement(By.xpath("//*[@resource-id='com.experitest.ExperiBank:id/logoutButton']")).click();
     }

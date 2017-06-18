@@ -44,16 +44,18 @@ public class utils {
             writer = new PrintWriter(new BufferedWriter(new FileWriter("reports\\overallReport.txt", true)));
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
             if (status) {
-                writer.write(String.format("%-10s%-10s%-40s%-20s\n", sdf.format(new Date(System.currentTimeMillis())), "PASS", deviceID, testName));
+                writer.write(String.format("%-10s%-50s%-10s%-20s\n", sdf.format(new Date(System.currentTimeMillis())), deviceID, "PASS", testName));
             } else {
-                writer.write(String.format("%-10s%-10s%-40s%-20s\n", sdf.format(new Date(System.currentTimeMillis())), "FAIL", deviceID, testName));
+                writer.write(String.format("%-10s%-50s%-10s%-20s\n", sdf.format(new Date(System.currentTimeMillis())), deviceID, "FAIL", testName));
                 e.printStackTrace(writer);
+                writer.write("---------------------------------------------------------------------------------------------------------------------\n");
             }
             writer.close();
         } catch (IOException ex) {
             e.printStackTrace();
         }
     }
+
     public void screenshot(AppiumDriver driver, String path) throws IOException {
         File srcFile = driver.getScreenshotAs(OutputType.FILE);
         String filename = "dfjklsdhfjk" + "#" + System.currentTimeMillis();

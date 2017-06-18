@@ -35,7 +35,7 @@ public class SingleTest {
     @Before
     public void setUp() throws IOException {
 
-        driver = CreateDriver(getDesiredCapabilities("00d064b580b7e36184819a9ce668f8c9f1d2413f"));
+        driver = CreateDriver(getDesiredCapabilities("FA69J0308869"));
     }
 
     private DesiredCapabilities getDesiredCapabilities(String udid) throws IOException {
@@ -64,10 +64,14 @@ public class SingleTest {
         } else {
 //            dc.setCapability(MobileCapabilityType.APP, "cloud:com.experitest.ExperiBank/.LoginActivity");
 //            dc.setCapability(AndroidMobileCapabilityType.APP_PACKAGE, "com.experitest.ExperiBank");
-//
-            dc.setCapability(MobileCapabilityType.APP, "http://192.168.2.72:8181/AndroidApps/eribank.apk");
-            dc.setCapability(AndroidMobileCapabilityType.APP_PACKAGE, "com.experitest.ExperiBank");
-            dc.setCapability(AndroidMobileCapabilityType.APP_ACTIVITY, ".LoginActivity");
+//            dc.setCapability(AndroidMobileCapabilityType.APP_PACKAGE, "com.experitest.ExperiBank");
+//            dc.setCapability(AndroidMobileCapabilityType.APP_ACTIVITY, ".LoginActivity");
+//            dc.setCapability(MobileCapabilityType.APP, "http://192.168.2.72:8181/AndroidApps/eribank.apk");
+
+            dc.setCapability(MobileCapabilityType.APP, "\\\\192.168.2.6\\Users\\DELL\\Desktop\\UICatalog.apk");
+            dc.setCapability(AndroidMobileCapabilityType.APP_PACKAGE, "com.experitest.uicatalog");
+            dc.setCapability(AndroidMobileCapabilityType.APP_ACTIVITY, ".MainActivity");
+
         }
 
         return dc;
@@ -121,23 +125,24 @@ public class SingleTest {
     }
 
     private void AndroidTest() {
-        if(GRID) System.out.println(driver.getCapabilities().getCapability("cloudViewLink"));
-
-        if (((AndroidDriver) driver).isLocked()){
-            System.out.println("Locked - Opening");
+        if (GRID) System.out.println(driver.getCapabilities().getCapability("cloudViewLink"));
+        ((AndroidDriver) driver).lockDevice();
+        if (((AndroidDriver) driver).isLocked()) {
+            System.out.println("GOOD - Locked - Opening");
             ((AndroidDriver) driver).unlockDevice();
-        }else{
-            System.out.println("false on isLocked");
-        }
-        if (((AndroidDriver) driver).isLocked()){
-            System.out.println("Open - Locking");
-            ((AndroidDriver) driver).lockDevice();
-        }else{
-            System.out.println("false on isLocked");
+            if (((AndroidDriver) driver).isLocked()) {
+                System.out.println("NOT_GOOD - Should be unlocked");
+                ((AndroidDriver) driver).lockDevice();
+            } else {
+                System.out.println("GOOD - unlocked");
+            }
+        } else {
+            System.out.println("NOT_GOOD - false on isLocked");
         }
 
-        if(((AndroidDriver) driver).isLocked())
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+
+        if (((AndroidDriver) driver).isLocked())
+            driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         driver.findElementByXPath("//*[@text='Username']").sendKeys("company");
 
         WebElement passwordField = driver.findElement(By.xpath("//*[@resource-id='com.experitest.ExperiBank:id/passwordTextField']"));
@@ -169,6 +174,7 @@ public class SingleTest {
     private void IOSTest() {
         //driver.swipe(500,0,500,1000,1000);
         Capabilities ddd = driver.getCapabilities();
+
 
         driver.findElement(By.xpath("//*[@placeholder='Username']")).sendKeys("company");
         System.out.println(driver.findElement(By.xpath("//*[@placeholder='Username']")).getText());

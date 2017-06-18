@@ -66,7 +66,7 @@ public abstract class BaseTest {
                 e1.printStackTrace();
             }
 
-            utils.writeToOverall(false, deviceID, testName, e);
+            utils.writeToOverall(false, deviceName.replace(" ","_").trim(), testName, e);
         }
         try {
             driver.quit();
@@ -97,7 +97,6 @@ public abstract class BaseTest {
 
         }
     }
-
 
     protected abstract void androidTest() throws Exception;
 
