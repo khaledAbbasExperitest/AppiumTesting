@@ -38,6 +38,17 @@ public abstract class BaseTest {
         }
     }
 
+    public boolean init(DesiredCapabilities dc) {
+        try {
+            CreateDriver(dc);
+            return true;
+        } catch (MalformedURLException e) {
+            System.out.println("Device - " + deviceID + " Failed To Init - " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public abstract DesiredCapabilities createCapabilities(DesiredCapabilities dc);
 
     public void executeTest() {
@@ -51,11 +62,14 @@ public abstract class BaseTest {
             } else {
                 androidTest();
             }
+            long time = System.currentTimeMillis() - Long.parseLong((String) driver.getCapabilities().getCapability("startTime"));
+            utils.writeToOverall(true, deviceName.replace(" ", "_").trim(), testName, null, time);
             System.out.println("--------------------------------------------------------------------------");
             System.out.println("THE TEST HAD PASSED - " + testName + " For Device - " + deviceID);
             System.out.println("--------------------------------------------------------------------------");
-            utils.writeToOverall(true, deviceName.replace(" ","_").trim(), testName, null);
         } catch (Exception e) {
+            long time = System.currentTimeMillis() - Long.parseLong((String) driver.getCapabilities().getCapability("startTime"));
+            utils.writeToOverall(false, deviceName.replace(" ", "_").trim(), testName, e, time);
             System.out.println("--------------------------------------------------------------------------");
             System.out.println("THE TEST HAD FAILED *** - " + testName + " For Device - " + deviceName + "_" + deviceID);
             System.out.println("--------------------------------------------------------------------------");
@@ -66,7 +80,6 @@ public abstract class BaseTest {
                 e1.printStackTrace();
             }
 
-            utils.writeToOverall(false, deviceName.replace(" ","_").trim(), testName, e);
         }
         try {
             driver.quit();
@@ -84,6 +97,7 @@ public abstract class BaseTest {
 
     protected void CreateDriver(DesiredCapabilities dc) throws MalformedURLException {
         dc.setCapability("testName", testName + "_" + deviceName);
+        dc.setCapability("startTime", String.valueOf(System.currentTimeMillis()));
 
         if (deviceOS.contains("ios")) {
             driver = new NewIOSDriver(new URL(url), dc);

@@ -1,4 +1,0 @@
-15:03:11  iphone_b0042                                      PASS      ChromeTest          
-15:04:11  ipad_10_2                                         PASS      ChromeTest          
-15:10:31  google_pixel_black                                PASS      ChromeTest          
-15:10:46  oneplus_one_e1003                                 PASS      ChromeTest          

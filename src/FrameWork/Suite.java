@@ -1,14 +1,11 @@
 package FrameWork;
 
-import AppiumSuite.ChromeTest;
 import AppiumSuite.EriBankTest;
-import AppiumSuite.PlayStore;
+import AppiumSuite.WebTest;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Map;
 
 public class Suite implements Runnable {
 
@@ -28,18 +25,15 @@ public class Suite implements Runnable {
         if (Runner.GRID) {
             dc.setCapability("user", Runner.cloudServer.USER);
             dc.setCapability("password", Runner.cloudServer.PASS);
-            dc.setCapability("TOEX",System.currentTimeMillis()%100000);
         }
-
     }
 
     public void run() {
         System.out.println("Starting Suite For - " + deviceID);
         for (int i = 0; i < Runner.REP_NUM; i++) {
 //            new EriBankTest(deviceID, new DesiredCapabilities(this.dc), url);
-            new ChromeTest(deviceID, new DesiredCapabilities(this.dc), url);
-//            new PlayStore(deviceID, new DesiredCapabilities(this.dc),url);
-//            new CameraAppTest(deviceID, this.dc);
+            new WebTest(deviceID, new DesiredCapabilities(this.dc), url);
+//            new NonInstrumented(deviceID, new DesiredCapabilities(this.dc),url);
         }
     }
 }

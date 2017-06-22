@@ -19,16 +19,10 @@ public class EriBankTest extends BaseTest {
     public EriBankTest(String deviceID, DesiredCapabilities generalDC, String url) {
         super("EriBank", deviceID, url);
         DesiredCapabilities dc = createCapabilities(generalDC);
-        try {
-            CreateDriver(dc);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-        try {
+        if (init(dc)) {
             executeTest();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+
     }
 
 
@@ -77,12 +71,17 @@ public class EriBankTest extends BaseTest {
 
 
         boolean flag = false;
+        long loopStartTime = System.currentTimeMillis();
         while (!flag) {
             try {
                 driver.findElement(By.xpath("xpath=//*[@text='Send Payment' and @onScreen='true']"));
-                flag=true;
+                flag = true;
             } catch (Exception e) {
                 driver.swipe(500, 1000, 500, 200, 1000);
+                if (System.currentTimeMillis() > (loopStartTime + 30000)) {
+                    flag = true;
+                }
+
             }
         }
         driver.findElement(By.xpath("//*[@text='Send Payment' and @onScreen='true']")).click();
@@ -94,6 +93,7 @@ public class EriBankTest extends BaseTest {
 
     @Override
     protected void iosTest() throws Exception {
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         driver.findElement(By.xpath("//*[@placeholder='Username']")).sendKeys("company");
         driver.findElement(By.xpath("//*[@placeholder='Password']")).sendKeys("company");
         driver.findElement(By.xpath("//*[@accessibilityLabel='loginButton']")).click();

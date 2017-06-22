@@ -17,10 +17,10 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by amit.licht on 05/24/2017.
  */
-public class ChromeTest extends AppiumSuite.BaseTest {
+public class WebTest extends AppiumSuite.BaseTest {
 
-    public ChromeTest(String deviceEntry, DesiredCapabilities generalDC, String url) {
-        super("ChromeTest", deviceEntry, url);
+    public WebTest(String deviceEntry, DesiredCapabilities generalDC, String url) {
+        super("WebTest", deviceEntry, url);
         DesiredCapabilities dc = createCapabilities(generalDC);
         try {
             CreateDriver(dc);
@@ -49,16 +49,15 @@ public class ChromeTest extends AppiumSuite.BaseTest {
         driver.findElementByXPath("//*[@name='btnG']").click();
 
         Map<String, String> sites = getSites();
-        String prefix = "chrome:";
         String homeIdentifier = "//*[@class='android.widget.TextView']";
 
         for (Map.Entry site : sites.entrySet()) {
             driver.get("http://" + site.getKey());
             driver.findElement(By.xpath((String) site.getValue()));
-            ((AndroidDriver) driver).pressKeyCode(AndroidKeyCode.HOME);
-            driver.context("native_app");
-            // System.out.println(driver.getPageSource());
-            driver.findElement(By.xpath(homeIdentifier));
+//            ((AndroidDriver) driver).pressKeyCode(AndroidKeyCode.HOME);
+//            driver.context("native_app");
+//            // System.out.println(driver.getPageSource());
+//            driver.findElement(By.xpath(homeIdentifier));
         }
 
         driver.closeApp();
@@ -75,7 +74,9 @@ public class ChromeTest extends AppiumSuite.BaseTest {
         Map<String, String> sites = getSites();
         for (Map.Entry site : sites.entrySet()) {
             driver.get("http://" + site.getKey());
-            driver.findElement(By.xpath((String) site.getValue()));
+            new WebDriverWait(driver, 20).until(ExpectedConditions.presenceOfElementLocated(By.xpath((String) site.getValue())));
+
+           // driver.findElement(By.xpath());
 //
         }
 

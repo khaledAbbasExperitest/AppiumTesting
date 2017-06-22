@@ -17,7 +17,7 @@ import java.util.Map;
 public class CloudServer {
     private static String webPage;
     private static String authStringEnc;
-    private static String DEVICES_URL="/devices";
+    private static String DEVICES_URL = "/devices";
     private String HOST;
     private String PORT;
     public String USER;
@@ -25,6 +25,7 @@ public class CloudServer {
     public String gridURL;
     CloudServerName cloudName;
     private String authString;
+    String result;
 
     public CloudServer(CloudServerName cloudName) {
         this.cloudName = cloudName;
@@ -34,10 +35,21 @@ public class CloudServer {
         webPage = "http://" + this.HOST + ":" + this.PORT + "/api/v1";
         byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
         authStringEnc = new String(authEncBytes);
+        try {
+            init();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void init() throws IOException {
+        System.out.println("Initiating The Cloud Object");
+        result = doGet(DEVICES_URL);
+        System.out.println("Done Initiating The Cloud Object");
+
     }
 
     public String getDeviceNameByUDID(String deviceID) throws IOException {
-        String result = doGet(DEVICES_URL);
         String deviceOS = getDeviceName(result, deviceID);
         return deviceOS;
     }
@@ -60,7 +72,7 @@ public class CloudServer {
         while (j < devicePropertiesArray.length && !osFlag) {
 
             if (devicePropertiesArray[j].contains("deviceName")) {
-                deviceOs = devicePropertiesArray[j].substring(devicePropertiesArray[j].indexOf("=")+1).trim().toLowerCase();
+                deviceOs = devicePropertiesArray[j].substring(devicePropertiesArray[j].indexOf("=") + 1).trim().toLowerCase();
                 osFlag = true;
             }
             j++;
@@ -102,13 +114,11 @@ public class CloudServer {
     }
 
     public String getDeviceOSByUDID(String UDID) throws IOException {
-        String result = doGet(DEVICES_URL);
         String deviceOS = getDeviceOS(result, UDID);
         return deviceOS;
     }
 
     public List<String> getAllAvailableDevices() throws IOException {
-        String result = doGet(DEVICES_URL);
         List<String> devicesList = getAvailableDevicesMap(result);
         return devicesList;
     }
@@ -164,10 +174,7 @@ public class CloudServer {
         JSONObject jsonObject = new JSONObject(result);
         Map obj = jsonObject.toMap();
         List<Object> data = (List<Object>) obj.get("data");
-        Object[] devicesArray = data
-                .stream()
-                .filter(student -> ((Map) student).get("displayStatus").equals("Available"))
-                .toArray();
+        Object[] devicesArray = GetFilteredDevices(data);
 
         for (int i = 0; i < devicesArray.length; i++) {
             String[] devicePropertiesArray = devicesArray[i].toString().replace("{", "").replace("]", "").split(",");
@@ -187,5 +194,33 @@ public class CloudServer {
         }
         System.out.println(tempDevicesList.toString());
         return tempDevicesList;
+    }
+
+    private Object[] GetFilteredDevices(List<Object> data) {
+        Object[] devicesArray = new Object[0];
+        switch (Runner.USED_OS.toLowerCase()) {
+            case "android": {
+                devicesArray = data
+                        .stream()
+                        .filter(device -> ((Map) device).get("displayStatus").equals("Available") && ((Map) device).get("deviceOs").equals("Android"))
+                        .toArray();
+                break;
+            }
+            case "ios": {
+                devicesArray = data
+                        .stream()
+                        .filter(device -> ((Map) device).get("displayStatus").equals("Available") && ((Map) device).get("deviceOs").equals("iOS"))
+                        .toArray();
+                break;
+            }
+            case "all": {
+                devicesArray = data
+                        .stream()
+                        .filter(device -> ((Map) device).get("displayStatus").equals("Available"))
+                        .toArray();
+                break;
+            }
+        }
+        return devicesArray;
     }
 }

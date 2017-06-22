@@ -5,6 +5,7 @@ import io.appium.java_client.android.AndroidElement;
 import io.appium.java_client.remote.AndroidMobileCapabilityType;
 import io.appium.java_client.remote.IOSMobileCapabilityType;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -18,12 +19,12 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by khaled.abbas on 5/23/2017.
  */
-public class PlayStore extends BaseTest {
+public class NonInstrumented extends BaseTest {
 
 
-    public PlayStore(String deviceID, DesiredCapabilities generalDC, String url) {
+    public NonInstrumented(String deviceID, DesiredCapabilities generalDC, String url) {
 
-        super("PlayStore", deviceID, url);
+        super("NonInstrumented", deviceID, url);
         DesiredCapabilities dc = createCapabilities(generalDC);
         try {
             CreateDriver(dc);
@@ -107,47 +108,37 @@ public class PlayStore extends BaseTest {
 
     @Override
     protected void iosTest() throws Exception {
-        String countriesString = "xpath=//*[(@knownSuperClass='UILabel' or @knownSuperClass='UICollectionViewCell' or @knownSuperClass='UIAccessibilityElement') and (not(contains(@text,'Today')) and not(contains(@text,':')) and not(contains(@text,'Add')))][1]";
+        String countriesString = "//*[(@knownSuperClass='UILabel' or @knownSuperClass='UICollectionViewCell' or @knownSuperClass='UIAccessibilityElement') and (not(contains(@text,'Today')) and not(contains(@text,':')) and not(contains(@text,'Add')))][1]";
         driver.executeScript("client:client.sendText(\"{HOME}\")");
-        driver.executeScript("client:client.click(\"NATIVE\", \"xpath=//*[@accessibilityLabel='Clock']\", 0, 1)");
-        driver.executeScript("client:client.waitForElement(\"NATIVE\", \"xpath=//*[@text='World Clock' and (@knownSuperClass='UITabBarButton' or @class='UIAButton')]\", 0, 10000)");
-        driver.executeScript("client:client.click(\"NATIVE\", \"xpath=//*[@text='World Clock' and (@knownSuperClass='UITabBarButton' or @class='UIAButton')]\", 0, 1)");
-//        Object aaa = driver.executeScript("client:client.isElementFound(\"NATIVE\", \"xpath=//*[@text='Add' and @x>0 and @onScreen='true']\"),0");
-//        System.out.println(aaa.toString());
-//        if (!(boolean) driver.executeScript("client:client.isElementFound(\"NATIVE\", \"xpath=//*[@text='Add' and @x>0 and @onScreen='true']\")")) {
-//            String firstCountry = (String) driver.executeScript("client:client.getAllValues(\"NATIVE\", countriesString, \"text\")[0]");
+        driver.findElement(By.xpath("//*[@accessibilityLabel='Clock']")).click();
+        driver.findElement(By.xpath("//*[@text='World Clock' and (@knownSuperClass='UITabBarButton' or @class='UIAButton')]")).click();
+        try {
+            WebElement element = driver.findElement(By.xpath("//*[@text='Add' and @x>0 and @onScreen='true']"));
+        } catch (Exception e) {
+            List<WebElement> list = driver.findElements(By.xpath(countriesString));
+            deleteCountry(list.get(list.size() - 1).getText());
+        }
+        driver.findElement(By.xpath("//*[@text='Add' and @x>0 and @onScreen='true']")).click();
+        driver.findElement(By.xpath("  //*[@knownSuperClass='UISearchBarTextField' or @class='UIASearchBar']")).click();
+        driver.getKeyboard().sendKeys("LONDON");
+        driver.findElement(By.xpath("//*[@text='London, England']")).click();
         deleteCountry("London");
-//        }
-//        driver.executeScript("client:client.verifyElementFound(\"NATIVE\", "xpath=/*//*[@text='Add' and @x>0 and @onScreen='true']", 0);
-//        driver.executeScript("client:client.click(\"NATIVE\", "xpath=//*[@text='Add' and @x>0 and @onScreen='true']", 0, 1);
-//        driver.executeScript("client:client.click(\"NATIVE\", "xpath=//*[@knownSuperClass='UISearchBarTextField' or @class='UIASearchBar']", 0, 1);
-//
-//        driver.executeScript("client:client.sendText("LONDON");
-//        driver.executeScript("client:client.waitForElement(\"NATIVE\", "xpath=/*//*[@text='London, England']", 0, 10000);
-//        driver.executeScript("client:client.click(\"NATIVE\", "xpath=//*[@text='London, England']", 0, 1);
-//        deleteCountry("London");
-//        driver.executeScript("client:client.capture(); //TEST
-//        driver.executeScript("client:client.sendText("{HOME}");
-//        driver.executeScript("client:client.verifyElementFound(\"NATIVE\", "xpath=//*[@accessibilityLabel='Settings']", 0);
+        driver.executeScript("client:client.sendText(\"{HOME}\")");
     }
 
     private void deleteCountry(String countryStr) {
         driver.executeScript("client:client.getVisualDump(\"native\")");
-        String deleteElement = "xpath=//*[contains(@text,'Delete " + countryStr + "')]  | //*[contains(@text,'London')]/*/*[@text='Remove clock']";
+        String deleteElement = "//*[contains(@text,'Delete " + countryStr + "')]  | //*[contains(@text,'London')]/*/*[@text='Remove clock']";
 
-//        driver.executeScript("client:client.waitForElement(\"NATIVE\", \"xpath=//*[@text='Edit']\", 0, 10000)");
         driver.executeScript("client:client.click(\"NATIVE\", \"xpath=//*[@text='Edit']\", 0, 1)");
-//        driver.executeScript("client:client.verifyElementFound(\"NATIVE\", deleteElement, 0)");
-        driver.executeScript("client:client.click(\"NATIVE\", " + deleteElement + ", 0, 1)");
-        if ((boolean) driver.executeScript("client:client.waitForElement(\"NATIVE\", \"xpath=//*[@text='Delete']\", 0, 10000))")) {
+        driver.findElement(By.xpath(deleteElement)).click();
 
-            driver.executeScript("client:client.click(\"NATIVE\", \"xpath=//*[@text='Delete']", 0, 1);
-            driver.executeScript("client:client.click(\"NATIVE\", \"xpath=//*[@accessibilityLabel='World Clock']", 0, 1);
+        try {
+            WebElement element = driver.findElement(By.xpath("//*[@text='Delete']"));
+            driver.findElement(By.xpath("//*[@text='Delete']")).click();
+            driver.findElement(By.xpath("//*[@accessibilityLabel='World Clock']")).click();
+        } catch (Exception e) {
 
         }
     }
 }
-//        driver.executeScript("client:client.verifyElementFound(\"NATIVE\", deleteElement, 0)");
-//        driver.executeScript("client:client.waitForElement(\"NATIVE\", \"xpath=//*[@text='Edit']\", 0, 10000)");
-//        driver.executeScript("client:client.getAllValues(\"NATIVE\", countriesString, \"text\")[0]");
-//        driver.executeScript("client:client.isElementFound(\"NATIVE\", \"xpath=//*[@text='Add' and @x>0 and @onScreen='true']\")")
