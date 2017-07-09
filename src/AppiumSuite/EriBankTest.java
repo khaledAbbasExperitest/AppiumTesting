@@ -11,7 +11,6 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.net.MalformedURLException;
 import java.util.concurrent.TimeUnit;
 
 public class EriBankTest extends BaseTest {
@@ -46,7 +45,7 @@ public class EriBankTest extends BaseTest {
     protected void androidTest() throws Exception {
         Capabilities aaa = driver.getCapabilities();
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-        driver.findElementByXPath("//*[@text='Username']").sendKeys("company");
+        driver.findElementByXPath("//*[@resource-id='com.experitest.ExperiBank:id/usernameTextField']").sendKeys("company");
 
         WebElement passwordField = driver.findElement(By.xpath("//*[@resource-id='com.experitest.ExperiBank:id/passwordTextField']"));
         passwordField.sendKeys("company");
@@ -61,9 +60,9 @@ public class EriBankTest extends BaseTest {
         driver.findElement(By.xpath("//*[@resource-id='com.experitest.ExperiBank:id/phoneTextField']")).sendKeys("55151");
 
         driver.rotate(ScreenOrientation.LANDSCAPE);
-        driver.findElement(By.xpath("//*[@text='Name']")).sendKeys("app manager");
+        driver.findElement(By.xpath("//*[@resource-id='com.experitest.ExperiBank:id/nameTextField']")).sendKeys("app manager");
         driver.hideKeyboard();
-        driver.findElement(By.xpath("//*[@text='Amount']")).sendKeys("100");
+        driver.findElement(By.xpath("//*[@resource-id='com.experitest.ExperiBank:id/amountTextField']")).sendKeys("100");
         driver.hideKeyboard();
         WebElement selectCountry = driver.findElement(By.xpath("//*[@resource-id='com.experitest.ExperiBank:id/countryButton']"));
         selectCountry.click();
