@@ -3,6 +3,7 @@ package FrameWork;
 import io.appium.java_client.ios.IOSDriver;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.remote.SessionId;
+import org.openqa.selenium.remote.http.HttpClient;
 
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -19,10 +20,16 @@ public class NewIOSDriver extends IOSDriver {
         if (Runner.GRID) System.out.println(this.getCapabilities().getCapability("cloudViewLink"));
 
         this.deviceID = (String) desiredCapabilities.getCapability("udid");
-        this.deviceName = ((String) desiredCapabilities.getCapability("deviceName")).replace(" ","_").replace("'","-").trim();
+        this.deviceName = ((String) this.getCapabilities().getCapability("device.name")).replace(" ","_").replace("'","-").trim();
 
     }
+    public NewIOSDriver(URL remoteAddress, HttpClient.Factory httpClientFactory, Capabilities desiredCapabilities) {
+        super(remoteAddress, httpClientFactory, desiredCapabilities);
+        if (Runner.GRID) System.out.println(this.getCapabilities().getCapability("cloudViewLink"));
+        this.deviceID = (String) desiredCapabilities.getCapability("udid");
+        this.deviceName = ((String) this.getCapabilities().getCapability("device.name")).replace(" ", "_").replace("'", "-").trim();
 
+    }
     @Override
     protected void log(SessionId sessionId, String commandName, Object toLog, When when) {
         if (commandName.equals("newSession")) sdf = new SimpleDateFormat("HH:mm:ss");

@@ -15,7 +15,7 @@ public class utils {
     public static void writeToDeviceLog(String deviceID, String stringToWrite) {
         PrintWriter writer = null;
         try {
-            writer = new PrintWriter(new BufferedWriter(new FileWriter("reports\\" + deviceID + ".txt", true)));
+            writer = new PrintWriter(new BufferedWriter(new FileWriter(Runner.reportDir.getName() + "\\" + deviceID + ".txt", true)));
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
             writer.write(String.format("%-10s %-100s\n", sdf.format(new Date(System.currentTimeMillis())), stringToWrite));
             writer.close();
@@ -34,22 +34,25 @@ public class utils {
 
     }
 
-    public static void writeToOverall(boolean status, String deviceID, String testName, Exception e, long time) {
+    public static void writeToOverall(boolean status, String deviceID, String testName, Exception e, long time, String pathInReporter) {
         PrintWriter writer = null;
-
+        PrintWriter exceptionWriter = null;
         try {
-            writer = new PrintWriter(new BufferedWriter(new FileWriter("reports\\overallReport.txt", true)));
+
+            exceptionWriter = new PrintWriter(new BufferedWriter(new FileWriter(Runner.reportDir.getName() + "\\Exceptions.txt", true)));
+            writer = new PrintWriter(new BufferedWriter(new FileWriter(Runner.reportDir.getName() + "\\overallReport.txt", true)));
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
             if (status) {
-                writer.write(String.format("%-10s%-50s%-10s%-20s%-20s\n", sdf.format(new Date(System.currentTimeMillis())), deviceID, "PASS", testName, (time / 1000) + "s"));
+                writer.write(String.format("%-10s%-50s%-10s%-20s%-20s%-50s\n", sdf.format(new Date(System.currentTimeMillis())), deviceID, "PASS", testName, (time / 1000) + "s", pathInReporter));
             } else {
-                writer.write(String.format("%-10s%-50s%-10s%-20s%-20s\n", sdf.format(new Date(System.currentTimeMillis())), deviceID, "FAIL", testName, (time / 1000) + "s"));
-                if (Runner.PRINT_ERROR) {
-                    e.printStackTrace(writer);
-                    writer.write("---------------------------------------------------------------------------------------------------------------------\n");
-                }
+                writer.write(String.format("%-10s%-50s%-10s%-20s%-20s%-50s\n ", sdf.format(new Date(System.currentTimeMillis())), deviceID, "FAIL", testName, (time / 1000) + "s",pathInReporter));
+                exceptionWriter.write(String.format("%-10s%-50s%-10s%-20s\n ", sdf.format(new Date(System.currentTimeMillis())), deviceID, "FAIL", testName));
+                e.printStackTrace(exceptionWriter);
+
+
             }
             writer.close();
+            exceptionWriter.close();
         } catch (IOException ex) {
             e.printStackTrace();
         }

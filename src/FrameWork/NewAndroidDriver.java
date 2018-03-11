@@ -1,9 +1,9 @@
 package FrameWork;
 
-import FrameWork.utils;
 import io.appium.java_client.android.AndroidDriver;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.remote.SessionId;
+import org.openqa.selenium.remote.http.HttpClient;
 
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -11,7 +11,7 @@ import java.util.Date;
 
 public class NewAndroidDriver extends AndroidDriver {
     private final String deviceID;
-    private final String deviceName;
+    private String deviceName;
     SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 
     public NewAndroidDriver(URL remoteAddress, Capabilities desiredCapabilities) {
@@ -19,10 +19,16 @@ public class NewAndroidDriver extends AndroidDriver {
         super(remoteAddress, desiredCapabilities);
         if (Runner.GRID) System.out.println(this.getCapabilities().getCapability("cloudViewLink"));
         this.deviceID = (String) desiredCapabilities.getCapability("udid");
-        this.deviceName = ((String) desiredCapabilities.getCapability("deviceName")).replace(" ","_").replace("'","-").trim();
+        this.deviceName = ((String) this.getCapabilities().getCapability("device.name")).replace(" ", "_").replace("'", "-").trim();
 
     }
+    public NewAndroidDriver(URL remoteAddress, HttpClient.Factory httpClientFactory, Capabilities desiredCapabilities) {
+        super(remoteAddress, httpClientFactory, desiredCapabilities);
+        if (Runner.GRID) System.out.println(this.getCapabilities().getCapability("cloudViewLink"));
+        this.deviceID = (String) desiredCapabilities.getCapability("udid");
+        this.deviceName = ((String) this.getCapabilities().getCapability("device.name")).replace(" ", "_").replace("'", "-").trim();
 
+    }
     @Override
     protected void log(SessionId sessionId, String commandName, Object toLog, When when) {
         if (commandName.equals("newSession")) sdf = new SimpleDateFormat("HH:mm:ss");
@@ -35,3 +41,5 @@ public class NewAndroidDriver extends AndroidDriver {
         }
     }
 }
+
+

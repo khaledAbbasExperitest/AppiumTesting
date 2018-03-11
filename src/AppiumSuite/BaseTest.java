@@ -1,54 +1,150 @@
 package AppiumSuite;
 
-import FrameWork.NewAndroidDriver;
-import FrameWork.NewIOSDriver;
-import FrameWork.Runner;
-import FrameWork.utils;
+import FrameWork.*;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import org.apache.commons.io.FileUtils;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.json.JSONObject;
+import org.junit.Assert;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.internal.ApacheHttpClient;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Base64;
 
+import static FrameWork.Runner.USE_OS;
 import static Utils.ExceptionExtractor.ExtractExceptions;
 
 public abstract class BaseTest {
-    private String deviceName;
+
+
+    protected String deviceName;
     String deviceID;
     String deviceOS;
+    String agent;
+    String testPathInReporter;
     AppiumDriver driver;
     String testName;
     String url;
+    AgentsFailCounter agentFails;
 
-    BaseTest(String testName, String deviceID, String url) {
-        this.testName = testName;
-        this.deviceID = deviceID;
+    BaseTest(String testName, String deviceIDOrOS, String url, int repNumber, String deviceAgent) {
+        this.testName = testName + repNumber;
+        agentFails = new AgentsFailCounter();
+        this.deviceID = deviceIDOrOS;
+        this.agent = deviceAgent;
         this.url = url;
         try {
-            this.deviceOS = Runner.cloudServer.getDeviceOSByUDID(deviceID);
-            this.deviceName = Runner.cloudServer.getDeviceNameByUDID(this.deviceID);
+            if(USE_OS) {
+                this.deviceOS = this.deviceID;
+            }
+            else{
+                System.out.println("Device ID + " + deviceIDOrOS + " device Agent: " + deviceAgent);
+                this.deviceOS = Runner.cloudServer.getDeviceOSByUDID(deviceIDOrOS);
+                this.deviceName = Runner.cloudServer.getDeviceNameByUDID(this.deviceID);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
+    public enum screenSize {
+        SMALL, LARGE;
+    }
     public boolean init(DesiredCapabilities dc) {
         try {
             CreateDriver(dc);
+            this.deviceID = (String) driver.getCapabilities().getCapability("udid");
+            this.deviceName = (String) driver.getCapabilities().getCapability("device.name");
+            agentFails.resetFailCounter(agent);
             return true;
-        } catch (MalformedURLException e) {
-            System.out.println("Device - " + deviceID + " Failed To Init - " + e.getMessage());
+        } catch (Exception e) {
+            agentFails.incFailCounter(agent);
             e.printStackTrace();
+//            if(e.getMessage().contains("INSTALL_FAILED_INSUFFICIENT_STORAGE")){
+//                getDeviceIDFromReport(e.getMessage());
+//            }
+            if(deviceName != null) {
+                utils.writeToOverall(false, deviceName.replace(" ", "_").trim(), testName, e, System.currentTimeMillis(), "Failed To init");
+            }
+            else{
+                utils.writeToOverall(false, this.deviceID, testName, e, System.currentTimeMillis(), "Failed To init");
+            }
+            if(e.getMessage().contains("INSTALL_FAILED_INSUFFICIENT_STORAGE")){
+                RebootDevice(e);
+            }
             return false;
         }
     }
 
+    private void RebootDevice(Exception e) {
+        DesiredCapabilities DesireCaps = new DesiredCapabilities();
+        String udid = getDeviceIDFromReport(e.getMessage());
+        DesireCaps.setCapability("udid", udid);
+        try {
+            DesireCaps.setCapability("deviceName", Runner.cloudServer.getDeviceNameByUDID(udid));
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+        DesireCaps.setCapability("reportFormat", "xml");
+        DesireCaps.setCapability("stream", Runner.STREAM_NAME);
+        if (Runner.GRID) {
+            DesireCaps.setCapability("accessKey", Runner.cloudServer.ACCESSKEY);
+            new Reboot(udid, new DesiredCapabilities(DesireCaps), url, 0, "");
+        }
+    }
+
+    private String getDeviceIDFromReport(String exceptionMessage){
+        String report = exceptionMessage.split("reportUrl=")[1].split("\\)\\)")[0];
+        String extractedDeviceID = "";
+        String resultFromAPI = "";
+        try {
+            resultFromAPI = sendAPIRequest(report);
+            JSONObject obj = new JSONObject(resultFromAPI);
+
+            JSONObject object2 = (JSONObject) obj.get("keyValuePairs");
+            extractedDeviceID = object2.getString("device.serialNumber");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return extractedDeviceID;
+
+    }
+    private String sendAPIRequest(String report) throws IOException {
+        String authString = Runner.cloudServer.USER + ":" + Runner.cloudServer.PASS;
+//        String authString = "khaleda:Experitest2012";
+        String authStringEnc = Base64.getEncoder().encodeToString(authString.getBytes());
+        report = report.replace("#", "api");
+        report = report.replace("test", "tests");
+        URL url = new URL(report);
+        URLConnection urlConnection = url.openConnection();
+        urlConnection.setRequestProperty("Authorization", "Basic " + authStringEnc);
+        InputStream is = urlConnection.getInputStream();
+        InputStreamReader isr = new InputStreamReader(is);
+        int numCharsRead;
+        char[] charArray = new char[1024];
+        StringBuffer sb = new StringBuffer();
+        while ((numCharsRead = isr.read(charArray)) > 0) {
+            sb.append(charArray, 0, numCharsRead);
+        }
+        String result = sb.toString();
+        boolean isResponseValid = ((HttpURLConnection)urlConnection).getResponseCode() < 300;
+        Assert.assertTrue("Did not get a valid response", isResponseValid);
+        return result;
+
+    }
     public abstract DesiredCapabilities createCapabilities(DesiredCapabilities dc);
 
     public void executeTest() {
@@ -56,20 +152,30 @@ public abstract class BaseTest {
         System.out.println("Starting test - " + testName + " For Device - " + deviceID);
         System.out.println("--------------------------------------------------------------------------");
 
+        System.out.println("-----------------------" + (String) driver.getCapabilities().getCapability("reportUrl"));
+        this.testPathInReporter = (String) driver.getCapabilities().getCapability("reportUrl");
         try {
             if (deviceOS.contains("ios")) {
                 iosTest();
             } else {
-                androidTest();
+                try {
+                    androidTest();
+                }catch (AssertionError AE){
+                    driver.getPageSource();
+                    throw new Exception(AE.getMessage());
+                }
             }
             long time = System.currentTimeMillis() - Long.parseLong((String) driver.getCapabilities().getCapability("startTime"));
-            utils.writeToOverall(true, deviceName.replace(" ", "_").trim(), testName, null, time);
+            System.out.println(this.testPathInReporter);
+            utils.writeToOverall(true, deviceName.replace(" ", "_").trim(), testName, null, time, this.testPathInReporter);
             System.out.println("--------------------------------------------------------------------------");
             System.out.println("THE TEST HAD PASSED - " + testName + " For Device - " + deviceID);
             System.out.println("--------------------------------------------------------------------------");
+            agentFails.resetFailCounter(agent);
         } catch (Exception e) {
+            agentFails.incFailCounter(agent);
             long time = System.currentTimeMillis() - Long.parseLong((String) driver.getCapabilities().getCapability("startTime"));
-            utils.writeToOverall(false, deviceName.replace(" ", "_").trim(), testName, e, time);
+            utils.writeToOverall(false, deviceName.replace(" ", "_").trim(), testName, e, time, this.testPathInReporter);
             System.out.println("--------------------------------------------------------------------------");
             System.out.println("THE TEST HAD FAILED *** - " + testName + " For Device - " + deviceName + "_" + deviceID);
             System.out.println("--------------------------------------------------------------------------");
@@ -100,11 +206,42 @@ public abstract class BaseTest {
         dc.setCapability("startTime", String.valueOf(System.currentTimeMillis()));
 
         if (deviceOS.contains("ios")) {
-            driver = new NewIOSDriver(new URL(url), dc);
+//            driver = new NewIOSDriver(new URL(Runner.cloudServer.gridURL), url -> {
+//                RequestConfig globalConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.IGNORE_COOKIES).build();
+//                CloseableHttpClient httpclient = HttpClients.custom().setDefaultRequestConfig(globalConfig).build();
+//                return new ApacheHttpClient(httpclient, url);
+//            }, dc);
+            if(Runner.GRID) {
+                driver = new NewIOSDriver(new URL(Runner.cloudServer.gridURL), url -> {
+                    RequestConfig globalConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.IGNORE_COOKIES).build();
+                    globalConfig = RequestConfig.custom().setSocketTimeout(6 * 60 * 1000).build();
+                    CloseableHttpClient httpclient = HttpClients.custom().setDefaultRequestConfig(globalConfig).build();
+                    return new ApacheHttpClient(httpclient, url);
+                }, dc);
+            }else {
+            driver = new NewIOSDriver(new URL("http://localhost:4723/wd/hub/"), dc);
+            }
+//            driver = new NewIOSDriver(new URL(url), dc);
+            //"http://" + HOST + ":" + PORT + "/wd/hub/";
+            //driver = new NewIOSDriver(new URL("http://192.168.2.156:80/wd/hub/"), dc);
             System.out.println("A Good iOS Driver Was Created For - " + deviceID);
 
         } else {
-            driver = new NewAndroidDriver(new URL(url), dc);
+//            driver = new AndroidDriver(new URL(Runner.cloudServer.gridURL), url -> {
+//                RequestConfig globalConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.IGNORE_COOKIES).build();
+//                CloseableHttpClient httpclient = HttpClients.custom().setDefaultRequestConfig(globalConfig).build();
+//                return new ApacheHttpClient(httpclient, url);
+//            }, dc);
+            if(Runner.GRID) {
+                driver = new NewAndroidDriver(new URL(Runner.cloudServer.gridURL), url -> {
+                    RequestConfig globalConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.IGNORE_COOKIES).build();
+                    globalConfig = RequestConfig.custom().setSocketTimeout(6 * 60 * 1000).build();
+                    CloseableHttpClient httpclient = HttpClients.custom().setDefaultRequestConfig(globalConfig).build();
+                    return new ApacheHttpClient(httpclient, url);
+                }, dc);
+            }else{
+                driver = new NewAndroidDriver(new URL("http://localhost:4723/wd/hub/"), dc);;
+            }
             System.out.println("A Good Android Driver Was Created For - " + deviceID);
             if (((AndroidDriver) driver).isLocked())
                 ((AndroidDriver) driver).unlockDevice();
